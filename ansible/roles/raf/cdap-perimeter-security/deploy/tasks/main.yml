@@ -70,12 +70,18 @@
   no_log: true
   when: inventory_hostname == groups['cdap-management-nodes'][0]
 
+- name: Disabling AD SSL authentication (cdap-site)
+  shell: "/var/lib/ambari-server/resources/scripts/configs.py -a set -u {{ ambari_admin_user }} -p {{ ambari_admin_password }} -l {{ cdap_loadbalancer_vip }}$
+  with_items:
+    - { config: 'cdap-site', key: 'security.authentication.handler.useLdaps', value: '{{cdap__security_authentication_handler_useLdaps}}' }
+  when: inventory_hostname == groups['cdap-management-nodes'][0] and cdap__security_authentication_handler_useLdaps == 'false'
+
 - name: Enabling AD SSL authentication (cdap-site)
   shell: "/var/lib/ambari-server/resources/scripts/configs.py -a set -u {{ ambari_admin_user }} -p {{ ambari_admin_password }} -l {{ cdap_loadbalancer_vip }} -n {{ cluster_name }} -c {{ item.config }} -k {{ item.key }} -v {{ item.value }}"
   with_items:
     - { config: 'cdap-site', key: 'security.authentication.handler.useLdaps', value: '{{cdap__security_authentication_handler_useLdaps}}' }
     - { config: 'cdap-site', key: 'security.authentication.handler.ldapsVerifyCertificate', value: '{{cdap__security_authentication_handler_ldapsVerifyCertificate}}' }
-  when: inventory_hostname == groups['cdap-management-nodes'][0]
+  when: inventory_hostname == groups['cdap-management-nodes'][0] and cdap__security_authentication_handler_useLdaps == 'true'
 
 - name: Copying logback.json to temporary directory
   copy:
