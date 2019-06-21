@@ -69,7 +69,7 @@ pipeline {
 		    } 
 		    else {
 		    sh"""
-		    mvn clean deploy -P default,templates,dist,release,rpm-prepare,rpm,deb-prepare,deb \
+		    mvn clean install -P default,templates,dist,release,rpm-prepare,rpm,deb-prepare,deb \
 		    -DskipTests \
 		    -Dcheckstyle.skip=true \
 		    -Dadditional.artifacts.dir=${env.WORKSPACE}/app-artifacts \
