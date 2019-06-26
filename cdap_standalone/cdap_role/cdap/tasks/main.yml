@@ -1,6 +1,15 @@
 ---
 # tasks file for cdap
 
+- name: Checking if CDAP's rpms are already installed or not
+  shell: yum list installed | grep cdap
+  register: result
+  ignore_errors: true
+
+- fail:
+   msg: "Some CDAP rpms are already installed"
+  when: result.stdout is match("cdap-*")
+
 - name: Creating Directory /opt/cdap-repos
   file:
     path: /opt/cdap-repos
@@ -16,15 +25,6 @@
     paths: /opt/cdap-repos
     excludes: 'cdap-ambari*,repodata,metadatasync*,cdap-provisioner*'
   register: fileslist
-
-- name: Checking if CDAP's rpms are already installed or not
-  shell: yum list installed | grep cdap
-  register: result
-  ignore_errors: true
- 
-- fail:
-   msg: "Some CDAP rpms are aleady installed"
-  when: result.stdout is match("cdap-*")
 
 - name: "Installing CDAP RPMs"
   yum:
