@@ -1,0 +1,5 @@
+---
+- name: cdap_standalone_installation
+  hosts: master
+  roles:
+   - { role: cdap }

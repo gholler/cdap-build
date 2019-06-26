@@ -1,0 +1,97 @@
+---
+# tasks file for cdap
+
+- name: Creating Directory /opt/cdap-repos
+  file:
+    path: /opt/cdap-repos
+    state: directory
+
+- name: Downloading the Required CDAP RPMs
+  shell: "wget -A rpm  -m -p -E -k -K -nd -l 1 {{ cdap_repo_url }}"
+  args:
+    chdir: /opt/cdap-repos
+
+- name: Listing needed files
+  find:
+    paths: /opt/cdap-repos
+    excludes: 'cdap-ambari*,repodata,metadatasync*,cdap-provisioner*'
+  register: fileslist
+
+- name: Checking if CDAP's rpms are already installed or not
+  shell: yum list installed | grep cdap
+  register: result
+  ignore_errors: true
+ 
+- fail:
+   msg: "Some CDAP rpms are aleady installed"
+  when: result.stdout is match("cdap-*")
+
+- name: "Installing CDAP RPMs"
+  yum:
+    name: "{{ item.path }}"
+    state: present
+  with_items: "{{ fileslist.files }}"
+
+- name: Check for /opt/cdap
+  stat: path=/opt/cdap
+  register: directory
+
+- fail:
+   msg: "/opt/cdap is not present"
+  when: not directory.stat.exists
+
+- name: Copying cdap-env.sh to /etc/cdap/conf
+  template:
+    src: cdap-env.sh.j2
+    dest: /etc/cdap/conf/cdap-env.sh
+
+- name: Getting mgt server
+  shell: cat /etc/hosts | grep mgt | awk '{print $1}' | head -1
+  register: mgt
+
+- name: Getting list of Zookeeper Nodes
+  shell: curl -u '{{ ambari_user }}':'{{ ambari_pass }}' -H "X-Requested-By:ambari" -i http://"{{ mgt.stdout }}":8080/api/v1/clusters/rafd004/components/KAFKA_BROKER | grep "host_name" | awk '{print $3}' | sed 's/$/:2181/' | sed 's/"//g' | paste -s -d, /dev/stdin 
+  register: zookeepernodes
+
+- name: Getting master server
+  shell: cat /etc/hosts | grep mst | awk '{print $2}' | sed 's/$/:9092/' | paste -s -d, /dev/stdin
+  register: mst
+
+- name: Getting fqdn of master on which CDAP is being Installed
+  shell: hostname -f
+  register: master
+
+- name: Copying cdap-site.xml to /etc/cdap/conf
+  template:
+    src: cdap-site.xml.j2
+    dest: /etc/cdap/conf/cdap-site.xml
+
+- name: Getting Ranger Server
+  shell: curl -u '{{ ambari_user }}':'{{ ambari_pass }}' -H "X-Requested-By:ambari" -i http://"{{ mgt.stdout }}":8080/api/v1/clusters/rafd004/components/RANGER_ADMIN | grep "host_name" | awk '{print $3}' | sed 's/"//g'
+  register: rangerserver
+
+- name: Add/Update ranger hdfs policies
+  uri:
+    url: "http://{{ rangerserver.stdout }}:6080/service/public/v2/api/policy"
+    method: POST
+    force_basic_auth: yes
+    user: "{{ rangeradmin_username }}"
+    password: "{{ rangeradmin_password }}"
+    headers: '{"Content-Type":"application/json", "X-Xsrf-Header":"valid"}'
+    body: "{{ item }}"
+    body_format: json
+    status_code: 200,201,202,400
+    return_content: yes
+  with_items:
+    - "{{ cdap_user_policy_config }}"
+    - "{{ cdap_path_policy_config }}"
+    - "{{ yarn_path_policy_config }}"
+    - "{{ hbase_all_policy_config }}"
+
+- name: Restarting required Services
+  shell: |
+    service cdap-auth-server restart
+    service cdap-kafka-server restart
+    service cdap-router restart
+    service cdap-ui restart
+    service cdap-master restart
