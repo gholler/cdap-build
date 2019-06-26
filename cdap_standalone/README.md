@@ -1,6 +1,7 @@
 <h3>List of Variable values to be changed in defualt/main.yml inside of role</h3>
 
-- Examples -<br> 
+
+Examples:-<br> 
 ##--vars_for_policies_updation--##<br>
 rangeradmin_username: admin<br>
 rangeradmin_password: admin123<br>
