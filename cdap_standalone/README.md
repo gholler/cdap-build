@@ -1,4 +1,4 @@
-<h3>List of Variable values to be changed in defualt/main.yml inside of role</h3>
+<h3>List of Variable values to be changed in defaults/main.yml inside of role before executing</h3>
 
 
 Examples:-<br> 
