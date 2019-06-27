@@ -50,6 +50,9 @@
     - { config: 'cdap-site', key: 'security.authentication.handler.roleMemberAttribute', value: '{{cdap__security_authentication_handler_roleMemberAttribute}}' }
     - { config: 'cdap-site', key: 'security.authentication.handler.roleObjectClass', value: '{{cdap__security_authentication_handler_roleObjectClass}}' }
     - { config: 'cdap-site', key: 'security.authentication.handler.bindDn', value: '{{cdap__security_authentication_handler_bindDn}}' }
+    - { config: 'cdap-site', key: 'security.authentication.knox.host.value', value: '{{cdap__security.authentication.knox.host.value }}' }
+    - { config: 'cdap-site', key: 'security.authentication.knox.post.value', value: '{{cdap__security.authentication.knox.post.value}}' }
+    - { config: 'cdap-site', key: 'security.authentication.knox.token.public.key', value: '{{cdap__security.authentication.knox.token.public.key}}' }
   when: inventory_hostname == groups['cdap-management-nodes'][0]
 
 - name: Enabling AD authentication (cdap-security) 
