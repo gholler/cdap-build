@@ -36,7 +36,10 @@ cdap__cdap_master_kerberos_principal: "cdap/_HOST@GVS.GGN"
 #----------------------------
 #  cdap-site authentication
 #----------------------------
-cdap__security_authentication_handlerClassName: "co.cask.cdap.security.server.LDAPAuthenticationHandler"
+cdap__security_authentication_handlerClassName: "co.cask.cdap.security.server.KnoxAuthenticationHandler"
+cdap__security.authentication.knox.host.value: "{{ management-nodes }}"
+cdap__security.authentication.knox.post.value:  "8443"
+cdap__security.authentication.knox.token.public.key: "{{ lookup('file', '/tmp/cert.pem') | replace('-----BEGIN CERTIFICATE-----\n', '') | replace('\n-----END CERTIFICATE-----', '') | replace('\n','') | string }}"
 cdap__security_authentication_loginmodule_className: "co.cask.cdap.security.server.LDAPLoginModule"
 cdap__security_authentication_handler_debug: "{{is_security_authentication_handler_debug|lower}}"
 cdap__security_authentication_handler_hostname: "{{security_authentication_handler_hostname}}"
