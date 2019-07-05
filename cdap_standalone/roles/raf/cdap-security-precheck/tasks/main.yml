@@ -1,6 +1,21 @@
 ---
 # tasks file for cdap-security-precheck
 
+- debug:
+    msg: "Environment should be kerberos for enabling CDAP security and kerberos is {{is_kerberos_auth_enabled}}"
+- fail:
+    msg: "Kerberos flag is :=> {{is_kerberos_auth_enabled}}."
+  when: (is_kerberos_auth_enabled|lower)|bool == false
+
+- set_fact:
+    site_floating_ip:
+      ip: "{{ hostvars[groups['management-nodes'][0]]['ansible_default_ipv4']['address'] }}"
+  when: site_deployment_type == 'NONHA'
+- debug:
+    msg: "Setup type is NONHA and site_floating_ip.ip is: {{ site_floating_ip.ip }}"
+  when: site_deployment_type == 'NONHA'
+
+
 - name: Getting kerberos principal using keytab
   shell: "klist -tke {{hdfs__kerberos_keytab_path}}/{{hdfs__kerberos_keytab_filename}} |grep '@' |awk -F' ' '{print $4}'|head -1"
   become: true
@@ -129,30 +144,30 @@
     - { src: "{{dashboard_ssl_key}}", dest: "{{dashboard_ssl_key}}" }
   when: inventory_hostname in groups['cdap-master-nodes']
 
-- name: Checking yarn queue exists
-  uri:
-   url: "http://{{ site_floating_ip.ip }}:8088/ws/v1/cluster/scheduler"
-   method: GET
-   return_content: yes
-  register: queue
-  when:
-    - inventory_hostname == groups['cdap-management-nodes'][0]
-    - (check_yarn_queue|lower) | bool
+#- name: Checking yarn queue exists
+#  uri:
+#   url: "http://{{ site_floating_ip.ip }}:8088/ws/v1/cluster/scheduler"
+#   method: GET
+#   return_content: yes
+#  register: queue
+#  when:
+#    - inventory_hostname == groups['cdap-management-nodes'][0]
+#    - (check_yarn_queue|lower) | bool
 
-- set_fact:
-    queues: "{{queue.json.scheduler.schedulerInfo.queues.queue}}"
-  when:
-    - inventory_hostname == groups['cdap-management-nodes'][0]
-    - queue.status == 200
-    - (check_yarn_queue|lower) | bool
+#- set_fact:
+#    queues: "{{queue.json.scheduler.schedulerInfo.queues.queue}}"
+#  when:
+#    - inventory_hostname == groups['cdap-management-nodes'][0]
+#    - queue.status == 200
+#    - (check_yarn_queue|lower) | bool
 
-- fail:
-    msg: "{{ yarn_queue_name }} yarn queue does not exist."
-  when:
-    - inventory_hostname == groups['cdap-management-nodes'][0]
-    - yarn_queue_name not in (queues|map(attribute='queueName')|list)
-    - queue.status == 200
-    - (check_yarn_queue|lower) | bool
+#- fail:
+#    msg: "{{ yarn_queue_name }} yarn queue does not exist."
+#  when:
+#    - inventory_hostname == groups['cdap-management-nodes'][0]
+#    - yarn_queue_name not in (queues|map(attribute='queueName')|list)
+#    - queue.status == 200
+#    - (check_yarn_queue|lower) | bool
 
 - name: Checking Required Services
   uri:
@@ -168,12 +183,5 @@
     - TEZ
   when: inventory_hostname == groups['cdap-management-nodes'][0] and check_services |bool
 
-- name: Restarting CDAP Services
-  shell: |
-    service cdap-auth-server restart
-    service cdap-kafka-server restart
-    service cdap-router restart
-    service cdap-ui restart
-    service cdap-master restart
 
 

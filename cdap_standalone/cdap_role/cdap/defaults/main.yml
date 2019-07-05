@@ -1,10 +1,12 @@
 ---
 # defaults file for cdap
 
+rangerserver: "192.168.134.238"
+
 ##--vars_for_policies_updation--##
 rangeradmin_username: admin
 rangeradmin_password: admin123
-cdap_cluster_name: rafd004
+cdap_cluster_name: "rafd004"
 ##--vars_for_policies_updation--##
 
 ##--vars_for_templates--##
@@ -13,53 +15,72 @@ ambari_pass: admin123
 hdp_version: 3.1.0.0-78
 ##--vars_for_templates--##
 
+krb_admin_password: 4E47Qyjbed9GEaHs@
+krb_admin_principal: gvsdevops/admin@GVS.GGN
+
 ##--where_to_fetch_cdap_rpms--##
 cdap_repo_url: http://artifacts.ggn.in.guavus.com/ggn-dev-rpms/cdap-build/5.1.205/dev/
 ##--where_to_fetch_cdap_rpms--##
 
 
 cdap_user_policy_config: |
-  {
+ {  
+   "service":"{{ cdap_cluster_name }}_yarn",
    "name":"cdap_user",
-   "service": "{{ cdap_cluster_name }}_yarn",
-   "isEnabled": true,
-   "isAuditEnabled": true,
-   "resources": {
-        "queue": {
-            "values": [
-                "default"
-            ],
-            "isExcludes": false,
-            "isRecursive": true
-        }
-    },
-    "policyItems": [
-        {
-            "accesses": [
-                {
-                    "type": "submit-app",
-                    "isAllowed": true
-                },
-                {
-                    "type": "admin-queue",
-                    "isAllowed": true
-                }
-            ],
-            "users": [
-                "cdap",
-                "hbase"
-            ],
-            "groups": [],
-            "conditions": [],
-            "delegateAdmin": false
-        }
-    ],
-    "denyPolicyItems": [],
-    "allowExceptions": [],
-    "denyExceptions": [],
-    "dataMaskPolicyItems": [],
-    "rowFilterPolicyItems": []
-  }
+   "description":"",
+   "isAuditEnabled":true,
+   "resources":{  
+      "queue":{  
+         "values":[  
+            "default"
+         ],
+         "isRecursive":true,
+         "isExcludes":false
+      }
+   },
+   "policyItems":[  
+      {  
+         "users":[  
+            "hbase",
+            "cdap"
+         ],
+         "accesses":[  
+            {  
+               "type":"submit-app",
+               "isAllowed":true
+            },
+            {  
+               "type":"admin-queue",
+               "isAllowed":true
+            }
+         ]
+      }
+   ],
+   "denyPolicyItems":[  
+
+   ],
+   "allowExceptions":[  
+
+   ],
+   "denyExceptions":[  
+
+   ],
+   "dataMaskPolicyItems":[  
+
+   ],
+   "rowFilterPolicyItems":[  
+
+   ],
+   "options":{  
+
+   },
+   "validitySchedules":[  
+
+   ],
+   "policyLabels":[  
+      ""
+   ]
+ }
 
 cdap_path_policy_config: |
   {

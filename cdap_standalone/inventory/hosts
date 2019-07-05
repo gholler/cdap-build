@@ -1,8 +1,18 @@
-[management-nodes]
+[cdap-management-nodes]
 rafd004-mgt-01.cloud.in.guavus.com
 
-[master-nodes]
+[cdap-master-nodes]
 rafd004-mst-01.cloud.in.guavus.com
 rafd004-mst-02.cloud.in.guavus.com
 
 [slave-nodes]
+
+[ranger-nodes]
+rafd004-mst-01.cloud.in.guavus.com
+
+# BEGIN ANSIBLE MANAGED BLOCK
+[zookeeper-nodes]
+rafd004-infra-01.cloud.in.guavus.com
+rafd004-infra-02.cloud.in.guavus.com
+rafd004-infra-03.cloud.in.guavus.com
+# END ANSIBLE MANAGED BLOCK

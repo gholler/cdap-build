@@ -1,0 +1,6 @@
+---
+# defaults file for makeinvent
+
+inventpath: /root/standalone/cdap-build/cdap_standalone/inventory/hosts
+ambari_user: admin
+ambari_pass: admin123

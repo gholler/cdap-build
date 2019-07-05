@@ -1,0 +1,9 @@
+- name: Enabling Security for CDAP
+  hosts:
+    - all:loadbalancer-nodes
+  any_errors_fatal: true
+
+  roles:
+#   - raf/cdap-security-precheck/
+    - raf/cdap-ranger-auth/deploy
+#    - raf/cdap-perimeter-security/deploy

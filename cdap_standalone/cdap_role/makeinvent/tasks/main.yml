@@ -1,0 +1,23 @@
+---
+# tasks file for makeinvent
+
+- name: Getting mgt server
+  tags: mgt
+  shell: cat /etc/hosts | grep mgt | awk '{print $1}' | head -1
+  register: mgt
+  when: inventory_hostname == groups['cdap-management-nodes'][0]
+
+- name: Getting list of Zookeeper Nodes
+  tags: test
+  shell: curl -u '{{ ambari_user }}':'{{ ambari_pass }}' -H "X-Requested-By:ambari" -i http://"{{ mgt.stdout }}":8080/api/v1/clusters/rafd004/components/ZOOKEEPER_SERVER | grep "host_name" | awk '{print $3}' | sed 's/"//g'
+  register: zookeepernodes
+  when: inventory_hostname == groups['cdap-management-nodes'][0]
+
+- name: Adding entries to inventory
+  blockinfile:
+    path: "{{ inventpath }}"
+    block: |
+      [zookeeper-nodes]
+      {{ zookeepernodes.stdout }}
+  when: inventory_hostname == groups['cdap-management-nodes'][0]
+
