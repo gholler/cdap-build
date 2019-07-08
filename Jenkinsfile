@@ -46,8 +46,8 @@ pipeline {
 		cd .. && \
 		cd cdap && \
 		mvn clean install -DskipTests -Dcheckstyle.skip && \
-		
-		cd .. 
+		cd cdap-app-fabric &&\
+		mvn test -Dcheckstyle.skip=true
 		"""
 		    if (env.BRANCH_NAME ==~ 'release1/guavus_.*') {
 		    sh"""
@@ -56,12 +56,6 @@ pipeline {
 		    -Dcheckstyle.skip=true \
 		    -Dadditional.artifacts.dir=${env.WORKSPACE}/app-artifacts \
 		    -Dsecurity.extensions.dir=${env.WORKSPACE}/security-extensions -DbuildNumber=${env.RELEASE}"""
-		    } 
-		    else {
-		    sh"""
-			cd ${env.WORKSPACE}/cdap/cdap-app-fabric && \
-			mvn test -Dcheckstyle.skip=true
-		    """
 		    }
 	}}}
 	  
