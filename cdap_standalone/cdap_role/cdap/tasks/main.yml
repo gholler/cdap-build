@@ -1,6 +1,11 @@
 ---
 # tasks file for cdap
 
+- name: Installing SSHPASS
+  yum:
+   name: sshpass
+   state: present
+
 - name: Create users
   user:
     name: "{{ item.user }}"
@@ -9,6 +14,43 @@
     groups: hadoop
   with_items:
     - { user: 'cdap', comment: 'CDAP user'  }
+
+- name: Getting lists of principal
+  shell: "klist -tke /etc/security/keytabs/cdap.headless.keytab | grep @GVS.GGN | awk '{ print $4 }' | head -n 1"
+  register: principal
+  when: inventory_hostname in groups['cdap-master-nodes'][0]
+
+- name: Doing Kinit for cdap.headless
+  shell: "kinit -kt /etc/security/keytabs/cdap.headless.keytab {{ principal.stdout }}"
+  when: inventory_hostname in groups['cdap-master-nodes'][0]
+
+- name: Copying cdap.headless keytab
+  shell: "sshpass -p {{ clusterpassword }} scp {{ clusteruser }}@{{ item }}:/etc/security/keytabs/cdap.headless.keytab /etc/security/keytabs/"
+  with_items:
+   - groups['all']
+  when: inventory_hostname in groups['cdap-master-nodes'][0]
+
+- name: Changing ownership of cdap.headless
+  file:
+    path: /etc/security/keytabs/cdap.headless.keytab
+    owner: cdap
+    group: cdap
+
+- name: Getting lists of principal
+  shell: "klist -tke /etc/security/keytabs/cdap.service.keytab | grep @GVS.GGN | awk '{ print $4 }' | head -n 1"
+  register: principal
+  when: inventory_hostname in groups['cdap-master-nodes']
+
+- name: Doing Kinit for cdap.headless
+  shell: "kinit -kt /etc/security/keytabs/cdap.service.keytab {{ principal.stdout }}"
+  when: inventory_hostname in groups['cdap-master-node']
+
+- name: Changing ownership of cdap.service
+  file:
+    path: /etc/security/keytabs/cdap.service.keytab
+    owner: cdap
+    group: cdap
+  when: inventory_hostname in groups['cdap-master-node']
 
 - name: Checking if CDAP's rpms are already installed or not
   shell: yum list installed | grep cdap
@@ -32,21 +74,19 @@
 #    chdir: /opt/cdap-repos
 #  when: inventory_hostname in groups['cdap-master-nodes']
 
-#- name: Listing needed files
-#  tags: test1
-#  find:
-#    paths: /opt/cdap-repos
-#    excludes: 'cdap-ambari*,repodata,metadatasync*,cdap-provisioner*'
-#  register: fileslist
-#  when: inventory_hostname in groups['cdap-master-nodes']
+- name: Listing needed files
+  find:
+    paths: /opt/cdap-repos
+    excludes: 'cdap-ambari*,repodata,metadatasync*,cdap-provisioner*'
+  register: fileslist
+  when: inventory_hostname in groups['cdap-master-nodes']
 
-#- name: "Installing CDAP RPMs"
-#  tags: test2
-#  yum:
-#   name: "{{ item.path }}"
-#    state: present
-#  with_items: "{{ fileslist.files }}"
-#  when: inventory_hostname in groups['cdap-master-nodes']
+- name: "Installing CDAP RPMs"
+  yum:
+   name: "{{ item.path }}"
+    state: present
+  with_items: "{{ fileslist.files }}"
+  when: inventory_hostname in groups['cdap-master-nodes']
 
 - name: Check for /opt/cdap
   stat: path=/opt/cdap
@@ -91,7 +131,7 @@
 
 - name: GET group id for group hadoop
   uri:
-    url: "http://{{ rangerserver }}:6080/service/xusers/groups/groupName/hadoop"
+    url: "http://{{ hostvars[groups['ranger-nodes'][0]]['ansible_hostname'] }}:6080/service/xusers/groups/groupName/hadoop"
     method: GET
     force_basic_auth: yes
     user: "{{ rangeradmin_username }}"
@@ -104,7 +144,7 @@
 
 - name: Create CDAP user in ranger
   uri:
-    url: "http://{{ rangerserver }}:6080/service/xusers/secure/users"
+    url: "http://{{ hostvars[groups['ranger-nodes'][0]]['ansible_hostname'] }}:6080/service/xusers/secure/users"
     method: POST
     force_basic_auth: yes
     user: "{{ rangeradmin_username }}"
@@ -118,7 +158,7 @@
 
 - name: Deleting hdfs policies
   uri:
-    url: "http://{{ rangerserver }}:6080/service/public/v2/api/policy?servicename={{ cdap_cluster_name }}_yarn&policyname={{item}}"
+    url: "http://{{ hostvars[groups['ranger-nodes'][0]]['ansible_hostname'] }}:6080/service/public/v2/api/policy?servicename={{ cdap_cluster_name }}_yarn&policyname={{item}}"
     method: DELETE
     force_basic_auth: yes
     user: "{{ rangeradmin_username }}"
@@ -132,7 +172,7 @@
 
 - name: Deleting hadoop policies
   uri:
-    url: "http://{{ rangerserver }}:6080/service/public/v2/api/policy?servicename={{ cdap_cluster_name }}_hadoop&policyname={{item}}"
+    url: "http://{{ hostvars[groups['ranger-nodes'][0]]['ansible_hostname'] }}:6080/service/public/v2/api/policy?servicename={{ cdap_cluster_name }}_hadoop&policyname={{item}}"
     method: DELETE
     force_basic_auth: yes
     user: "{{ rangeradmin_username }}"
@@ -147,7 +187,7 @@
 
 - name: Deleting hbase policies
   uri:
-    url: "http://{{ rangerserver }}:6080/service/public/v2/api/policy?servicename={{ cdap_cluster_name }}_hbase&policyname={{item}}"
+    url: "http://{{ hostvars[groups['ranger-nodes'][0]]['ansible_hostname'] }}:6080/service/public/v2/api/policy?servicename={{ cdap_cluster_name }}_hbase&policyname={{item}}"
     method: DELETE
     force_basic_auth: yes
     user: "{{ rangeradmin_username }}"
@@ -161,7 +201,7 @@
 
 - name: Add/Update ranger hdfs policies
   uri:
-    url: "http://{{ rangerserver }}:6080/service/public/v2/api/policy"
+    url: "http://{{ hostvars[groups['ranger-nodes'][0]]['ansible_hostname'] }}:6080/service/public/v2/api/policy"
     method: POST
     force_basic_auth: yes
     user: "{{ rangeradmin_username }}"
