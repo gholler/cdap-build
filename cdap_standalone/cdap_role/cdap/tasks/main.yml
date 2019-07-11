@@ -5,6 +5,7 @@
   yum:
    name: sshpass
    state: present
+  when: inventory_hostname in groups['cdap-master-nodes']
 
 - name: Create users
   user:
@@ -24,33 +25,71 @@
   shell: "kinit -kt /etc/security/keytabs/cdap.headless.keytab {{ principal.stdout }}"
   when: inventory_hostname in groups['cdap-master-nodes'][0]
 
+- name: adding to known hosts
+  shell: "ssh-keyscan {{ item }} >> ~/.ssh/known_hosts"
+  with_items: "{{ groups['all'] }}"
+  when: inventory_hostname in groups['cdap-master-nodes'][0]
+
 - name: Copying cdap.headless keytab
-  shell: "sshpass -p {{ clusterpassword }} scp {{ clusteruser }}@{{ item }}:/etc/security/keytabs/cdap.headless.keytab /etc/security/keytabs/"
-  with_items:
-   - groups['all']
+  shell: "sshpass -p {{ clusterpassword }} scp /etc/security/keytabs/cdap.headless.keytab {{ clusteruser }}@{{ item }}:/etc/security/keytabs/"
+  with_items: "{{ groups['all'] }}"
   when: inventory_hostname in groups['cdap-master-nodes'][0]
 
 - name: Changing ownership of cdap.headless
   file:
     path: /etc/security/keytabs/cdap.headless.keytab
     owner: cdap
-    group: cdap
-
+    group: hadoop
+  
 - name: Getting lists of principal
-  shell: "klist -tke /etc/security/keytabs/cdap.service.keytab | grep @GVS.GGN | awk '{ print $4 }' | head -n 1"
+  shell: "klist -tke /etc/security/keytabs/cdap.service.keytab | grep @GVS.GGN | awk '{ print $4 }' | tail -n 1"
   register: principal
   when: inventory_hostname in groups['cdap-master-nodes']
 
-- name: Doing Kinit for cdap.headless
+- name: Doing Kinit for cdap.service
   shell: "kinit -kt /etc/security/keytabs/cdap.service.keytab {{ principal.stdout }}"
-  when: inventory_hostname in groups['cdap-master-node']
+  when: inventory_hostname in groups['cdap-master-nodes']
 
 - name: Changing ownership of cdap.service
   file:
     path: /etc/security/keytabs/cdap.service.keytab
     owner: cdap
-    group: cdap
-  when: inventory_hostname in groups['cdap-master-node']
+    group: hadoop
+  when: inventory_hostname in groups['cdap-master-nodes']
+
+- name: Getting lists of principal 
+  shell: "klist -tke /etc/security/keytabs/hdfs.headless.keytab | grep @GVS.GGN | awk '{ print $4 }' | head -n 1"
+  register: principal
+  sudo: yes
+  sudo_user: hdfs
+  when: inventory_hostname in groups['cdap-management-nodes'][0]
+
+- name: Giving Permission to use HDFS User
+  shell: "kinit -kt /etc/security/keytabs/hdfs.headless.keytab {{ principal.stdout }}"
+  sudo: yes
+  sudo_user: hdfs
+  when: inventory_hostname in groups['cdap-management-nodes'][0]
+
+- name: Creating Directory with HDFS user
+  shell: |
+    hadoop fs -mkdir /cdap
+    hadoop fs -chown -R cdap:hdfs /cdap
+  sudo: yes
+  sudo_user: hdfs
+  when: inventory_hostname in groups['cdap-management-nodes'][0]
+
+- name: Creating cdap-kafka Directory
+  file:
+    path: /data/cdap-kafka
+    state: directory
+  when: inventory_hostname in groups['cdap-master-nodes']
+
+- name: Changing ownership of cdap-kafka directory
+  file:
+    path: /data/cdap-kafka
+    owner: cdap
+    group: hadoop
+  when: inventory_hostname in groups['cdap-master-nodes']
 
 - name: Checking if CDAP's rpms are already installed or not
   shell: yum list installed | grep cdap
@@ -84,7 +123,7 @@
 - name: "Installing CDAP RPMs"
   yum:
    name: "{{ item.path }}"
-    state: present
+   state: present
   with_items: "{{ fileslist.files }}"
   when: inventory_hostname in groups['cdap-master-nodes']
 

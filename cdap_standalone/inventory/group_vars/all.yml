@@ -4,7 +4,7 @@ ansible_fqdn: "rafd004-mgt-01.cloud.in.guavus.com"
 hdp_version: 3.1.0.0
 hdp_build: 78
 
-cdap_loadbalancer_vip: "192.168.134.233"
+cdap_loadbalancer_vip: "192.168.134.26"
 cluster_name: 'rafd004'
 site_deployment_type: "HA"            #HA/NONHA
 install_using_public_repos: "false"

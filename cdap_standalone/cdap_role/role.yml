@@ -2,4 +2,5 @@
 - name: cdap_standalone_installation
   hosts: all
   roles:
+   - { role: makeinvent }
    - { role: cdap }

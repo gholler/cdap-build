@@ -1,7 +1,7 @@
 ---
 # defaults file for cdap
 
-clusterpassword: "root@123"
+clusterpassword: "guavus@123"
 clusteruser: "root"
 
 ##--vars_for_policies_updation--##
