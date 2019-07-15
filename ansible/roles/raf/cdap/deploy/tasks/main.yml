@@ -366,3 +366,15 @@
 - name: DELETE CDAP.REPO from yum.repo.d
   shell: rm -rf /etc/yum.repos.d/cdap.repo
 
+- name: Correcting logrotate file permissions
+  file:
+    path: "/etc/logrotate.d/cdap"
+    state: file
+    owner: root
+    group: root
+    mode: 0644
+  when: inventory_hostname in groups[cdap_master_nodes]
+
+- name: Run the logroate command
+  shell: logrotate -d /etc/logrotate.d/cdap
+  when: inventory_hostname in groups[cdap_master_nodes]
