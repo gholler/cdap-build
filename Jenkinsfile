@@ -56,6 +56,7 @@ pipeline {
                 cmake .. && \
                 make metadatasync_rpm && \
                 cd ../../../
+		"""
 	}}}
 
 	stage("RPM PUSH"){
