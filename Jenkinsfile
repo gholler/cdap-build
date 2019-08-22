@@ -42,7 +42,7 @@ pipeline {
                 cd build && \
                 cmake .. && \
                 make metadatasync_rpm && \
-                cd ../../../ && \
+                cd ../../../
 		"""
 	}}}
 
