@@ -45,7 +45,7 @@ pipeline {
 		./build.sh && \
 		cd .. && \
 		cd cdap && \
-		mvn clean install -Dmaven.test.skip=true -Dcheckstyle.skip && \
+		mvn clean install -DskipTests -Dcheckstyle.skip && \
 		cd .. && \
 		mvn clean install -Dmaven.test.skip=true -Dcheckstyle.skip=true -B -am -pl cdap/cdap-api -P templates && \
 		mvn clean install -Dmaven.test.skip=true -Dcheckstyle.skip=true -B -am -f cdap/cdap-app-templates -P templates && \
