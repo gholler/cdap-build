@@ -29,11 +29,11 @@
 [submodule "app-artifacts/auto-feature-engineering"]
 	path = app-artifacts/auto-feature-engineering
 	url = https://github.com/Guavus/auto-feature-engineering.git
-        branch = dev/build_guavus_5.1.207
+        branch = develop
 [submodule "app-artifacts/cdap-mrds"]
 	path = app-artifacts/cdap-mrds
 	url = https://github.com/Guavus/cdap-mrds.git
-	branch = dev/build_guavus_5.1.207
+	branch = develop
 [submodule "app-artifacts/auto-metadata-service"]
 	path = app-artifacts/auto-metadata-service
 	url = https://github.com/Guavus/auto-metadata-service.git
