@@ -36,11 +36,6 @@ pipeline {
 		git submodule update --remote && \
 		git submodule update --init --recursive --remote && \
 		export MAVEN_OPTS="-Xmx3056m -XX:MaxPermSize=128m" && \
-		mkdir build  && \
-		cd build  && \
-		cmake ..  && \
-		make  && \
-		cd .. && \
 		cd cdap-ambari-service && \
 		./build.sh && \
 		cd .. && \
@@ -56,8 +51,7 @@ pipeline {
                 cmake .. && \
                 make metadatasync_rpm && \
                 cd ../../../ && \
-		rm -rf ${env.WORKSPACE}/cdap/*/target/*.rpm  && \
-		rm -rf ${env.WORKSPACE}/ansible_rpm/*.rpm
+		rm -rf ${env.WORKSPACE}/cdap/*/target/*.rpm
 		"""
 		    if (env.BRANCH_NAME ==~ 'release1/guavus_.*') {
 		    sh"""
@@ -114,7 +108,6 @@ error "Pipeline aborted due to quality gate failure: ${qg.status}"
 	    sh ''
 	  rpm_push( env.buildType, '${WORKSPACE}/cdap/**/target', 'ggn-dev-rpms/cdap-build' )
 	  rpm_push( env.buildType, '${WORKSPACE}/cdap-ambari-service/target', 'ggn-dev-rpms/cdap-build' )
-	  rpm_push( env.buildType, '${WORKSPACE}', 'ggn-dev-rpms/cdap-build' )
 	  rpm_push( env.buildType, '${WORKSPACE}/app-artifacts/auto-metadata-service/', 'ggn-dev-rpms/metadatasync/' )
 	  deb_push(env.buildType, env.ARTIFACT_SRC1, env.ARTIFACT_DEST1 )
           deb_push(env.buildType, env.ARTIFACT_SRC2, env.ARTIFACT_DEST1 ) 
