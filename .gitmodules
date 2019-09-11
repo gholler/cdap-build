@@ -1,6 +1,6 @@
 [submodule "cdap"]
 	path = cdap
-	url = https://github.com/cdapio/cdap.git
+	url = git@github.com:Guavus/cdap.git
 	branch = release/6.0
 [submodule "app-artifacts/hydrator-plugins"]
 	path = app-artifacts/hydrator-plugins
