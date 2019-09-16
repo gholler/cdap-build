@@ -5,7 +5,7 @@
 [submodule "app-artifacts/hydrator-plugins"]
 	path = app-artifacts/hydrator-plugins
 	url = git@github.com:Guavus/hydrator-plugins.git
-	branch = release/6
+	branch = features/RFCN-34-cdap-6.0-docker-image
 [submodule "security-extensions/cdap-security-extn"]
 	path = security-extensions/cdap-security-extn
 	url = https://github.com/cdapio/cdap-security-extn.git
