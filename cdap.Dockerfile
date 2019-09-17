@@ -13,7 +13,7 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 
-FROM gcr.io/cdapio/cdap-build:latest AS build
+FROM artifacts.guavus.mtl:4244/cdap-build:release-6.0 AS build
 ENV DIR /cdap/build
 ENV MAVEN_OPTS -Xmx2048m
 WORKDIR $DIR/
@@ -21,8 +21,8 @@ COPY . $DIR/
 RUN curl -sL https://deb.nodesource.com/setup_8.x | bash - && \
   apt-get update && \
   apt-get -y install nodejs && \
-  mvn install -f cdap -B -V -DskipTests -P templates,!unit-tests && \
-  mvn install -B -V -DskipTests -P templates,dist,k8s,!unit-tests \
+  mvn -s maven-m2-settings.xml install -f cdap -B -V -DskipTests -P templates,!unit-tests && \
+  mvn -s maven-m2-settings.xml install -B -V -DskipTests -P templates,dist,k8s,!unit-tests \
     -Dadditional.artifacts.dir=$DIR/app-artifacts \
     -Dsecurity.extensions.dir=$DIR/security-extensions \
     -Dui.build.name=cdap-non-optimized-full-build
@@ -30,6 +30,7 @@ RUN curl -sL https://deb.nodesource.com/setup_8.x | bash - && \
 FROM openjdk:8-jdk AS run
 WORKDIR /
 COPY --from=build /cdap/build/cdap/cdap-master/target/stage-packaging/opt/cdap/master /opt/cdap/master
+COPY --from=build /cdap/build/cdap/cdap-ui/target/stage-packaging/opt/cdap/ui /opt/cdap/ui
 COPY --from=build /cdap/build/cdap/cdap-distributions/src/etc/cdap/conf.dist/logback*.xml /opt/cdap/master/conf/
 
 RUN apt-get update && \

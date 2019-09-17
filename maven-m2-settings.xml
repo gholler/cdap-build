@@ -1,0 +1,10 @@
+<settings>
+  <mirrors>
+    <mirror>
+      <id>local-mirror</id>
+      <name>Local mirror</name>
+      <url>http://artifacts.guavus.mtl:80/remote-repos</url>
+      <mirrorOf>*</mirrorOf>
+    </mirror>
+  </mirrors>
+</settings>

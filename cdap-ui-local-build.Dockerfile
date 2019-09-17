@@ -1,5 +1,5 @@
 #
-# Copyright © 2019 Cask Data, Inc.
+# Copyright © 2016-2018 Cask Data, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -13,10 +13,13 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 
-# Dockerfile for building container for building CDAP.
-# It populate maven cache with dependencies needed for building CDAP.
-FROM maven:3-jdk-8 AS build
-ENV MAVEN_OPTS -Xmx4096m
-WORKDIR /cdap/maven/
-COPY . /cdap/maven/
-RUN mvn -s maven-m2-settings.xml org.apache.maven.plugins:maven-dependency-plugin:3.1.1:go-offline -B -V -P templates,dist,k8s
+FROM openjdk:8-jdk AS run
+WORKDIR /opt/cdap/ui
+COPY cdap/cdap-master/target/stage-packaging/opt/cdap/master /opt/cdap/master
+COPY cdap/cdap-ui/target/stage-packaging/opt/cdap/ui /opt/cdap/ui
+COPY cdap/cdap-distributions/src/etc/cdap/conf.dist/logback*.xml /opt/cdap/master/conf/
+
+ENV CLASSPATH=/etc/cdap/conf:/etc/cdap/security:/etc/hadoop/conf
+ENV SPARK_COMPAT=spark2_2.11
+ENV HBASE_VERSION=1.2
+ENTRYPOINT ["bin/node", "index.js"]
