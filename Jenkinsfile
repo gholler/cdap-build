@@ -49,13 +49,6 @@ pipeline {
 		cd .. && \
 		mvn clean install -DskipTests -Dcheckstyle.skip=true -B -am -pl cdap/cdap-api -P templates && \
 		mvn clean install -DskipTests -Dcheckstyle.skip=true -B -am -f cdap/cdap-app-templates -P templates && \
-                cd ${env.WORKSPACE}/app-artifacts/auto-metadata-service && \
-                mvn clean install -Dcheckstyle.skip=true && \
-                mkdir -p build && \
-                cd build && \
-                cmake .. && \
-                make metadatasync_rpm && \
-                cd ../../../ && \
 		rm -rf ${env.WORKSPACE}/cdap/*/target/*.rpm  && \
 		rm -rf ${env.WORKSPACE}/ansible_rpm/*.rpm
 		"""
@@ -87,9 +80,7 @@ The Path be a path to the folder which contains the POM file for the project/mod
 cdap_sonar(env.SONAR_PATH_CDAP, env.branchVersion, 'CDAP')
 cdap_sonar(env.SONAR_PATH_APP_ARTIFACTS_DRE, env.branchVersion, 'DRE')
 cdap_sonar(env.SONAR_PATH_APP_ARTIFACTS_HYDRATOR_PLUGINS, env.branchVersion, 'HYDRATOR-PLUGINS')
-cdap_sonar(env.SONAR_PATH_APP_ARTIFACTS_MRDS, env.branchVersion, 'MRDS')
 cdap_sonar(env.SONAR_PATH_APP_ARTIFACTS_MMDS, env.branchVersion, 'MMDS')
-cdap_sonar(env.SONAR_PATH_APP_ARTIFACTS_AFE, env.branchVersion, 'AFE')
 cdap_sonar(env.SONAR_PATH_SECURITY_EXTN, env.branchVersion, 'SECURITY-EXTENSION')
 /*timeout(time: 2, unit: 'HOURS') {
 def qg = waitForQualityGate()
@@ -115,7 +106,6 @@ error "Pipeline aborted due to quality gate failure: ${qg.status}"
 	  rpm_push( env.buildType, '${WORKSPACE}/cdap/**/target', 'ggn-dev-rpms/cdap-build' )
 	  rpm_push( env.buildType, '${WORKSPACE}/cdap-ambari-service/target', 'ggn-dev-rpms/cdap-build' )
 	  rpm_push( env.buildType, '${WORKSPACE}', 'ggn-dev-rpms/cdap-build' )
-	  rpm_push( env.buildType, '${WORKSPACE}/app-artifacts/auto-metadata-service/', 'ggn-dev-rpms/metadatasync/' )
 	  deb_push(env.buildType, env.ARTIFACT_SRC1, env.ARTIFACT_DEST1 )
           deb_push(env.buildType, env.ARTIFACT_SRC2, env.ARTIFACT_DEST1 ) 
     }}}
