@@ -26,15 +26,3 @@
 	path = sentry
 	url = https://github.com/Guavus/sentry
 	branch = dev/build_guavus_1.7.0_5.1.2041
-[submodule "app-artifacts/auto-feature-engineering"]
-	path = app-artifacts/auto-feature-engineering
-	url = https://github.com/Guavus/auto-feature-engineering.git
-        branch = dev/build_guavus_5.1.2041
-[submodule "app-artifacts/cdap-mrds"]
-	path = app-artifacts/cdap-mrds
-	url = https://github.com/Guavus/cdap-mrds.git
-	branch = dev/build_guavus_5.1.2041
-[submodule "app-artifacts/auto-metadata-service"]
-	path = app-artifacts/auto-metadata-service
-	url = https://github.com/Guavus/auto-metadata-service.git
-	branch = dev/build_guavus_1.0.0_5.1.2041
