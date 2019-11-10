@@ -1,6 +1,6 @@
 @Library('jenkins_lib')_
 pipeline {
-  agent {label 'slave'}
+  agent {label 'master'}
   environment { 
    	DEB_COMPONENT = 'cdap'
 	DEB_ARCH = 'amd64'
