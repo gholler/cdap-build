@@ -10,10 +10,6 @@
 	path = security-extensions/cdap-security-extn
 	url = https://github.com/Guavus/cdap-security-extn.git
 	branch = release/build_guavus_0.8_5.1.2045
-[submodule "app-artifacts/mmds"]
-	path = app-artifacts/mmds
-	url = https://github.com/Guavus/mmds.git
-	branch = release/build_guavus_1.1_5.1.2045
 [submodule "app-artifacts/dre"]
 	path = app-artifacts/dre
 	url = https://github.com/Guavus/dre.git
