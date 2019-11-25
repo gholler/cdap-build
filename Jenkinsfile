@@ -37,20 +37,8 @@ pipeline {
 		git submodule update --init --recursive --remote && \
 		export MAVEN_OPTS="-Xmx3056m -XX:MaxPermSize=128m" && \
 		cd cdap-ambari-service && \
-		VERSION=$VERSION RELEASE_PATH=http:\\/\\/artifacts.ggn.in.guavus.com:80\\/ggn-dev-rpms\\/cdap-build\\/$VERSION\\/release\\/ ./build.sh && \
+		CDAP_VERSION=$VERSION RELEASE_PATH=http:\\/\\/artifacts.ggn.in.guavus.com:80\\/ggn-dev-rpms\\/cdap-build\\/$VERSION\\/release\\/ ./build.sh && \
 		cd .. && \
-		cd cdap && \
-		mvn clean install -Dmaven.test.skip=true -Dcheckstyle.skip && \
-		cd .. && \
-		mvn clean install -Dmaven.test.skip=true -Dcheckstyle.skip=true -B -am -pl cdap/cdap-api -P templates && \
-		mvn clean install -Dmaven.test.skip=true -Dcheckstyle.skip=true -B -am -f cdap/cdap-app-templates -P templates && \
-                cd ${env.WORKSPACE}/app-artifacts/auto-metadata-service && \
-                mvn clean install -Dcheckstyle.skip=true && \
-                mkdir -p build && \
-                cd build && \
-                cmake .. && \
-                make metadatasync_rpm && \
-                cd ../../../ && \
 		rm -rf ${env.WORKSPACE}/cdap/*/target/*.rpm
 		"""
 		    if (env.BRANCH_NAME ==~ 'release1/guavus_.*') {
